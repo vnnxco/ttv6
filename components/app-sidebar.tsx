@@ -1,0 +1,118 @@
+"use client"
+
+import * as React from "react"
+import {
+  ArrowUpCircleIcon,
+  BriefcaseIcon,
+  DatabaseIcon,
+  HelpCircleIcon,
+  HomeIcon,
+  MessageSquareIcon,
+  FlaskConicalIcon,
+  SettingsIcon,
+} from "lucide-react"
+
+import { NavMain } from '@/components/nav-main'
+import { NavSecondary } from '@/components/nav-secondary'
+import { NavUser } from '@/components/nav-user'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar'
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  currentView?: 'dashboard' | 'chat' | 'playground' | 'projects' | 'data-library'
+  onNavigate?: (view: 'dashboard' | 'chat' | 'playground' | 'projects' | 'data-library') => void
+  onNavigateToChat?: () => void
+}
+
+export function AppSidebar({ currentView = 'dashboard', onNavigate, onNavigateToChat, ...props }: AppSidebarProps) {
+  const data = {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    navMain: [
+      {
+        title: "Dashboard",
+        url: "#",
+        icon: HomeIcon,
+        isActive: currentView === 'dashboard',
+        onClick: () => onNavigate?.('dashboard'),
+      },
+      {
+        title: "Chat",
+        url: "#",
+        icon: MessageSquareIcon,
+        isActive: currentView === 'chat',
+        onClick: () => onNavigate?.('chat'),
+      },
+      {
+        title: "Playground",
+        url: "#",
+        icon: FlaskConicalIcon,
+        isActive: currentView === 'playground',
+        onClick: () => onNavigate?.('playground'),
+      },
+      {
+        title: "Projects",
+        url: "#",
+        icon: BriefcaseIcon,
+        isActive: currentView === 'projects',
+        onClick: () => onNavigate?.('projects'),
+      },
+      {
+        title: "Data Library",
+        url: "#",
+        icon: DatabaseIcon,
+        isActive: currentView === 'data-library',
+        onClick: () => onNavigate?.('data-library'),
+      },
+    ],
+    navSecondary: [
+      {
+        title: "Settings",
+        url: "#",
+        icon: SettingsIcon,
+      },
+      {
+        title: "Help & Support",
+        url: "#",
+        icon: HelpCircleIcon,
+      },
+    ],
+  }
+
+  return (
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              <a href="#">
+                <ArrowUpCircleIcon className="h-5 w-5" />
+                <span className="text-base font-semibold">Acme Inc.</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={data.navMain} onNavigateToChat={onNavigateToChat} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
+    </Sidebar>
+  )
+}
