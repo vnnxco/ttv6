@@ -65,8 +65,8 @@ export function Playground() {
             onClick={() => setMode("complete")}
             className={`flex-1 text-xs sm:text-sm ${
               mode === "complete"
-                ? "bg-sidebar-foreground text-sidebar"
-                : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                ? "bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
+                : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             }`}
           >
             <GridIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -78,8 +78,8 @@ export function Playground() {
             onClick={() => setMode("insert")}
             className={`flex-1 text-xs sm:text-sm ${
               mode === "insert"
-                ? "bg-sidebar-foreground text-sidebar"
-                : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                ? "bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
+                : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             }`}
           >
             <DownloadIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -91,8 +91,8 @@ export function Playground() {
             onClick={() => setMode("edit")}
             className={`flex-1 text-xs sm:text-sm ${
               mode === "edit"
-                ? "bg-sidebar-foreground text-sidebar"
-                : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                ? "bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
+                : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             }`}
           >
             <ListIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -204,7 +204,7 @@ export function Playground() {
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               placeholder="Enter your text here..."
-              className="min-h-[200px] sm:min-h-[300px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="min-h-[200px] sm:min-h-[300px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-sidebar-ring focus:border-transparent"
             />
           </div>
 
@@ -218,7 +218,7 @@ export function Playground() {
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               placeholder="Enter instructions for the AI..."
-              className="min-h-[80px] sm:min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="min-h-[80px] sm:min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-sidebar-ring focus:border-transparent"
             />
           </div>
         </div>
@@ -255,7 +255,10 @@ export function Playground() {
                     <SettingsIcon className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:max-w-md bg-sidebar-accent/30">
+                <SheetContent 
+                  side="right" 
+                  className="w-full sm:max-w-md bg-sidebar border-sidebar-border"
+                >
                   <SheetHeader>
                     <SheetTitle className="text-sidebar-foreground">Configuration</SheetTitle>
                   </SheetHeader>
