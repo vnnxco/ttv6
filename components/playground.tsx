@@ -125,7 +125,7 @@ export function Playground() {
     <div className="flex flex-col h-full bg-sidebar">
       <div className="flex-1 p-6 space-y-6 overflow-y-auto">
         <div className="space-y-4">
-          <h3 className="text-sidebar-foreground font-semibold text-lg">Chatbot Workshop</h3>
+          <h3 className="text-sidebar-foreground font-semibold text-lg">Configurations</h3>
           
           <div className="space-y-3">
             <Label htmlFor="project-select" className="text-sidebar-foreground font-medium">
@@ -163,20 +163,20 @@ export function Playground() {
         </div>
       </div>
 
-      {/* Sticky Bottom Actions */}
+      {/* Sticky Bottom Actions - Side by Side */}
       <div className="p-6 border-t border-sidebar-border bg-sidebar">
-        <div className="space-y-3">
+        <div className="flex gap-3">
           <Button
             onClick={handleDatabase}
             variant="outline"
-            className="w-full bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
+            className="flex-1 bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
           >
             <DatabaseIcon className="h-4 w-4 mr-2" />
             Database
           </Button>
           <Button
             onClick={handleSave}
-            className="w-full bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
+            className="flex-1 bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
           >
             <SaveIcon className="h-4 w-4 mr-2" />
             Save
