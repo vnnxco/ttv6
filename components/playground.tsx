@@ -4,12 +4,11 @@ import * as React from "react"
 import { 
   SendIcon, 
   RotateCcwIcon,
-  PlayIcon,
   BotIcon,
   UserIcon,
   SettingsIcon,
   SaveIcon,
-  ShareIcon
+  XIcon
 } from "lucide-react"
 
 import { Button } from '@/components/ui/button'
@@ -23,8 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
 import { Card } from '@/components/ui/card'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import useIsMobile from '@/hooks/use-mobile'
 
 interface ChatMessage {
   id: string
@@ -33,12 +37,19 @@ interface ChatMessage {
   timestamp: Date
 }
 
+const mockProjects = [
+  { id: '1', name: 'Customer Support Bot' },
+  { id: '2', name: 'Sales Assistant' },
+  { id: '3', name: 'Technical Support' },
+  { id: '4', name: 'Product Recommendations' },
+  { id: '5', name: 'FAQ Assistant' }
+]
+
 export function Playground() {
-  const [chatbotName, setChatbotName] = React.useState("My Chatbot")
-  const [jobDescription, setJobDescription] = React.useState("You are a helpful customer support assistant for an e-commerce company. You help customers with orders, returns, and product questions. Be friendly, professional, and concise in your responses.")
-  const [model, setModel] = React.useState("gpt-3.5-turbo")
-  const [temperature, setTemperature] = React.useState([0.7])
-  const [maxTokens, setMaxTokens] = React.useState([1000])
+  const isMobile = useIsMobile()
+  const [selectedProject, setSelectedProject] = React.useState("1")
+  const [description, setDescription] = React.useState("You are a helpful customer support assistant for an e-commerce company. You help customers with orders, returns, and product questions. Be friendly, professional, and concise in your responses.")
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false)
   
   const [messages, setMessages] = React.useState<ChatMessage[]>([
     {
@@ -50,6 +61,8 @@ export function Playground() {
   ])
   const [currentMessage, setCurrentMessage] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
+
+  const selectedProjectName = mockProjects.find(p => p.id === selectedProject)?.name || 'My Chatbot'
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim()) return
@@ -97,6 +110,67 @@ export function Playground() {
     }
   }
 
+  const handleSave = () => {
+    // Handle save functionality
+    console.log('Saving chatbot configuration...')
+  }
+
+  // Settings Panel Component
+  const SettingsPanel = () => (
+    <div className="p-6 space-y-6 h-full overflow-y-auto">
+      <div className="space-y-4">
+        <h3 className="text-sidebar-foreground font-semibold text-lg">Chatbot Workshop</h3>
+        
+        <div className="space-y-3">
+          <Label htmlFor="project-select" className="text-sidebar-foreground font-medium">
+            Project
+          </Label>
+          <Select value={selectedProject} onValueChange={setSelectedProject}>
+            <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
+              <SelectValue placeholder="Select a project" />
+            </SelectTrigger>
+            <SelectContent>
+              {mockProjects.map((project) => (
+                <SelectItem key={project.id} value={project.id}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-3">
+          <Label htmlFor="description" className="text-sidebar-foreground font-medium">
+            Description
+          </Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe what your chatbot should do, its personality, and how it should behave..."
+            className="min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-xs text-sidebar-foreground/60">
+            This is the most important setting. Be specific about your chatbot's role, tone, and capabilities.
+          </p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="pt-4 border-t border-sidebar-border">
+        <div className="space-y-3">
+          <Button
+            onClick={handleSave}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <SaveIcon className="h-4 w-4 mr-2" />
+            Save Configuration
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div className="flex h-full w-full max-w-full overflow-hidden bg-background">
       {/* Left Panel - Chat Interface */}
@@ -109,7 +183,7 @@ export function Playground() {
                 <BotIcon className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-sidebar-foreground font-semibold">{chatbotName}</h3>
+                <h3 className="text-sidebar-foreground font-semibold">{selectedProjectName}</h3>
                 <p className="text-sidebar-foreground/60 text-sm">Testing Mode</p>
               </div>
             </div>
@@ -121,16 +195,48 @@ export function Playground() {
                 className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
               >
                 <RotateCcwIcon className="h-4 w-4 mr-2" />
-                Reset
+                <span className="hidden sm:inline">Reset</span>
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <SaveIcon className="h-4 w-4 mr-2" />
-                Save
-              </Button>
+              {isMobile ? (
+                <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    >
+                      <SettingsIcon className="h-4 w-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent 
+                    side="right" 
+                    className="w-full sm:max-w-md bg-sidebar-accent/30 border-sidebar-border p-0"
+                  >
+                    <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+                      <h2 className="text-sidebar-foreground font-semibold">Settings</h2>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsSettingsOpen(false)}
+                        className="h-6 w-6 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                      >
+                        <XIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <SettingsPanel />
+                  </SheetContent>
+                </Sheet>
+              ) : (
+                <Button
+                  onClick={handleSave}
+                  variant="ghost"
+                  size="sm"
+                  className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                >
+                  <SaveIcon className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -204,127 +310,12 @@ export function Playground() {
         </div>
       </div>
 
-      {/* Right Panel - Chatbot Configuration */}
-      <div className="w-80 flex flex-col bg-sidebar-accent/30 min-h-0">
-        <div className="p-6 space-y-6 overflow-y-auto">
-          {/* Chatbot Identity */}
-          <div className="space-y-4">
-            <h3 className="text-sidebar-foreground font-semibold text-lg">Chatbot Workshop</h3>
-            
-            <div className="space-y-3">
-              <Label htmlFor="chatbot-name" className="text-sidebar-foreground font-medium">
-                Chatbot Name
-              </Label>
-              <Input
-                id="chatbot-name"
-                value={chatbotName}
-                onChange={(e) => setChatbotName(e.target.value)}
-                className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="job-description" className="text-sidebar-foreground font-medium">
-                Job Description
-              </Label>
-              <Textarea
-                id="job-description"
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Describe what your chatbot should do, its personality, and how it should behave..."
-                className="min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-sidebar-foreground/60">
-                This is the most important setting. Be specific about your chatbot's role, tone, and capabilities.
-              </p>
-            </div>
-          </div>
-
-          {/* Model Configuration */}
-          <div className="space-y-4 pt-4 border-t border-sidebar-border">
-            <h4 className="text-sidebar-foreground font-medium">Model Settings</h4>
-            
-            <div className="space-y-3">
-              <Label htmlFor="model" className="text-sidebar-foreground font-medium">
-                AI Model
-              </Label>
-              <Select value={model} onValueChange={setModel}>
-                <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gpt-4">GPT-4 (Most Capable)</SelectItem>
-                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo (Balanced)</SelectItem>
-                  <SelectItem value="claude-3">Claude 3 (Alternative)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sidebar-foreground font-medium">Creativity</Label>
-                <span className="text-sm text-sidebar-foreground/70">{temperature[0]}</span>
-              </div>
-              <Slider
-                value={temperature}
-                onValueChange={setTemperature}
-                max={1}
-                min={0}
-                step={0.1}
-                className="w-full"
-              />
-              <p className="text-xs text-sidebar-foreground/60">
-                Lower = more focused, Higher = more creative
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sidebar-foreground font-medium">Response Length</Label>
-                <span className="text-sm text-sidebar-foreground/70">{maxTokens[0]}</span>
-              </div>
-              <Slider
-                value={maxTokens}
-                onValueChange={setMaxTokens}
-                max={2000}
-                min={100}
-                step={100}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="pt-4 border-t border-sidebar-border">
-            <div className="space-y-3">
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <PlayIcon className="h-4 w-4 mr-2" />
-                Deploy Chatbot
-              </Button>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
-                >
-                  <ShareIcon className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
-                >
-                  <SettingsIcon className="h-4 w-4 mr-2" />
-                  Advanced
-                </Button>
-              </div>
-            </div>
-          </div>
+      {/* Right Panel - Desktop Only */}
+      {!isMobile && (
+        <div className="w-80 flex flex-col bg-sidebar-accent/30 min-h-0">
+          <SettingsPanel />
         </div>
-      </div>
+      )}
     </div>
   )
 }
