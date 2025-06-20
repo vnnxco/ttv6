@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AppSidebar } from '@/components/app-sidebar'
 import { AiChat } from '@/components/ai-chat'
-import { Playground } from '@/components/playground'
+import Playground from '@/components/playground'
 import { Homepage } from '@/components/homepage'
 import { Projects } from '@/components/projects'
 import { KnowledgeBase } from '@/components/knowledge-base'
