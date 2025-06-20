@@ -47,7 +47,7 @@ const mockProjects = [
 
 export function Playground() {
   const isMobile = useIsMobile()
-  const [selectedProject, setSelectedProject] = React.useState("1")
+  const [selectedProject, setSelectedProject] = React.useState("4")
   const [description, setDescription] = React.useState("You are a helpful customer support assistant for an e-commerce company. You help customers with orders, returns, and product questions. Be friendly, professional, and concise in your responses.")
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false)
   
@@ -122,7 +122,7 @@ export function Playground() {
 
   // Settings Panel Component
   const SettingsPanel = () => (
-    <div className="flex flex-col h-full bg-sidebar">
+    <div className="flex flex-col h-full bg-background">
       <div className="flex-1 p-6 space-y-6 overflow-y-auto">
         <div className="space-y-4">
           <h3 className="text-sidebar-foreground font-semibold text-lg">Configurations</h3>
@@ -164,7 +164,7 @@ export function Playground() {
       </div>
 
       {/* Sticky Bottom Actions - Side by Side */}
-      <div className="p-6 border-t border-sidebar-border bg-sidebar">
+      <div className="p-6 border-t border-sidebar-border bg-background">
         <div className="flex gap-3">
           <Button
             onClick={handleDatabase}
@@ -191,7 +191,7 @@ export function Playground() {
       {/* Left Panel - Chat Interface */}
       <div className="flex-1 flex flex-col min-h-0 border-r border-sidebar-border">
         {/* Chat Header */}
-        <div className="border-b border-sidebar-border p-4 bg-sidebar-accent/30">
+        <div className="border-b border-sidebar-border p-4 bg-background">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -225,7 +225,7 @@ export function Playground() {
                   </SheetTrigger>
                   <SheetContent 
                     side="right" 
-                    className="w-full sm:max-w-md p-0 bg-sidebar border-sidebar-border"
+                    className="w-full sm:max-w-md p-0 bg-background border-sidebar-border"
                   >
                     <SettingsPanel />
                   </SheetContent>
@@ -246,7 +246,7 @@ export function Playground() {
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -293,7 +293,7 @@ export function Playground() {
         </div>
 
         {/* Chat Input */}
-        <div className="border-t border-sidebar-border p-4 bg-sidebar-accent/30">
+        <div className="border-t border-sidebar-border p-4 bg-background">
           <div className="flex gap-3">
             <Input
               value={currentMessage}
