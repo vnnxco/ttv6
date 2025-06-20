@@ -8,7 +8,7 @@ import {
   UserIcon,
   SettingsIcon,
   SaveIcon,
-  XIcon
+  DatabaseIcon
 } from "lucide-react"
 
 import { Button } from '@/components/ui/button'
@@ -115,56 +115,71 @@ export function Playground() {
     console.log('Saving chatbot configuration...')
   }
 
+  const handleDatabase = () => {
+    // Handle database functionality
+    console.log('Opening database...')
+  }
+
   // Settings Panel Component
   const SettingsPanel = () => (
-    <div className="p-6 space-y-6 h-full overflow-y-auto">
-      <div className="space-y-4">
-        <h3 className="text-sidebar-foreground font-semibold text-lg">Chatbot Workshop</h3>
-        
-        <div className="space-y-3">
-          <Label htmlFor="project-select" className="text-sidebar-foreground font-medium">
-            Project
-          </Label>
-          <Select value={selectedProject} onValueChange={setSelectedProject}>
-            <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
-              <SelectValue placeholder="Select a project" />
-            </SelectTrigger>
-            <SelectContent>
-              {mockProjects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex flex-col h-full bg-sidebar">
+      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+        <div className="space-y-4">
+          <h3 className="text-sidebar-foreground font-semibold text-lg">Chatbot Workshop</h3>
+          
+          <div className="space-y-3">
+            <Label htmlFor="project-select" className="text-sidebar-foreground font-medium">
+              Project
+            </Label>
+            <Select value={selectedProject} onValueChange={setSelectedProject}>
+              <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
+                <SelectValue placeholder="Select a project" />
+              </SelectTrigger>
+              <SelectContent>
+                {mockProjects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-3">
-          <Label htmlFor="description" className="text-sidebar-foreground font-medium">
-            Description
-          </Label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe what your chatbot should do, its personality, and how it should behave..."
-            className="min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <p className="text-xs text-sidebar-foreground/60">
-            This is the most important setting. Be specific about your chatbot's role, tone, and capabilities.
-          </p>
+          <div className="space-y-3">
+            <Label htmlFor="description" className="text-sidebar-foreground font-medium">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe what your chatbot should do, its personality, and how it should behave..."
+              className="min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <p className="text-xs text-sidebar-foreground/60">
+              This is the most important setting. Be specific about your chatbot's role, tone, and capabilities.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="pt-4 border-t border-sidebar-border">
+      {/* Sticky Bottom Actions */}
+      <div className="p-6 border-t border-sidebar-border bg-sidebar">
         <div className="space-y-3">
           <Button
+            onClick={handleDatabase}
+            variant="outline"
+            className="w-full bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
+          >
+            <DatabaseIcon className="h-4 w-4 mr-2" />
+            Database
+          </Button>
+          <Button
             onClick={handleSave}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
           >
             <SaveIcon className="h-4 w-4 mr-2" />
-            Save Configuration
+            Save
           </Button>
         </div>
       </div>
@@ -210,19 +225,8 @@ export function Playground() {
                   </SheetTrigger>
                   <SheetContent 
                     side="right" 
-                    className="w-full sm:max-w-md bg-sidebar-accent/30 border-sidebar-border p-0"
+                    className="w-full sm:max-w-md p-0 bg-sidebar border-sidebar-border"
                   >
-                    <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-                      <h2 className="text-sidebar-foreground font-semibold">Settings</h2>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsSettingsOpen(false)}
-                        className="h-6 w-6 text-sidebar-foreground/70 hover:text-sidebar-foreground"
-                      >
-                        <XIcon className="h-4 w-4" />
-                      </Button>
-                    </div>
                     <SettingsPanel />
                   </SheetContent>
                 </Sheet>
@@ -312,7 +316,7 @@ export function Playground() {
 
       {/* Right Panel - Desktop Only */}
       {!isMobile && (
-        <div className="w-80 flex flex-col bg-sidebar-accent/30 min-h-0">
+        <div className="w-80 flex flex-col min-h-0">
           <SettingsPanel />
         </div>
       )}
