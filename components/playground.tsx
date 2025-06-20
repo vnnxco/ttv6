@@ -6,9 +6,9 @@ import {
   RotateCcwIcon,
   DownloadIcon,
   SettingsIcon,
-  GridIcon,
-  ListIcon,
-  MenuIcon,
+  BotIcon,
+  MessageSquareIcon,
+  PenToolIcon,
   XIcon
 } from "lucide-react"
 
@@ -23,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
 import {
   Sheet,
   SheetContent,
@@ -31,21 +30,47 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import useIsMobile from '@/hooks/use-mobile'
+import { Switch } from '@/components/ui/switch'
+
+const userProjects = [
+  { id: 1, name: "Customer Support Bot", description: "Handles customer inquiries" },
+  { id: 2, name: "Sales Assistant", description: "Helps with sales processes" },
+  { id: 3, name: "Content Creator", description: "Generates marketing content" },
+  { id: 4, name: "Code Helper", description: "Assists with programming tasks" },
+]
 
 export function Playground() {
   const [userInput, setUserInput] = React.useState("We is going to the market.")
   const [instructions, setInstructions] = React.useState("Fix the grammar.")
-  const [model, setModel] = React.useState("text-davinci-003")
-  const [temperature, setTemperature] = React.useState([0.56])
-  const [maxLength, setMaxLength] = React.useState([256])
-  const [topP, setTopP] = React.useState([0.9])
-  const [mode, setMode] = React.useState("complete")
-  const [isConfigOpen, setIsConfigOpen] = React.useState(false)
-  const isMobile = useIsMobile()
+  const [selectedProject, setSelectedProject] = React.useState("")
+  const [mode, setMode] = React.useState<"chat" | "complete" | "edit">("complete")
+  const [showMobileConfig, setShowMobileConfig] = React.useState(false)
+
+  // Personality inputs
+  const [personality, setPersonality] = React.useState("helpful and friendly assistant")
+  const [tone, setTone] = React.useState("professional")
+  const [expertise, setExpertise] = React.useState("")
+  const [responseStyle, setResponseStyle] = React.useState("detailed")
+  
+  // Settings toggles
+  const [useEmojis, setUseEmojis] = React.useState(false)
+  const [includeExamples, setIncludeExamples] = React.useState(true)
+  const [factualMode, setFactualMode] = React.useState(false)
 
   const handleSubmit = () => {
-    console.log("Submitting:", { userInput, instructions, model, temperature, maxLength, topP })
+    console.log("Submitting:", { 
+      userInput, 
+      instructions, 
+      selectedProject, 
+      mode,
+      personality,
+      tone,
+      expertise,
+      responseStyle,
+      useEmojis,
+      includeExamples,
+      factualMode
+    })
   }
 
   const handleReset = () => {
@@ -53,129 +78,196 @@ export function Playground() {
     setInstructions("")
   }
 
-  const ConfigurationPanel = () => (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
+  const getModeIcon = (modeType: string) => {
+    switch (modeType) {
+      case "chat":
+        return <MessageSquareIcon className="h-4 w-4" />
+      case "complete":
+        return <BotIcon className="h-4 w-4" />
+      case "edit":
+        return <PenToolIcon className="h-4 w-4" />
+      default:
+        return <BotIcon className="h-4 w-4" />
+    }
+  }
+
+  const getModeDescription = () => {
+    switch (mode) {
+      case "chat":
+        return "Have a conversation with your AI assistant"
+      case "complete":
+        return "Complete text or generate content based on your input"
+      case "edit":
+        return "Edit and improve existing text"
+      default:
+        return "Complete text or generate content based on your input"
+    }
+  }
+
+  const ConfigurationContent = () => (
+    <div className="space-y-6">
       {/* Mode Selection */}
       <div className="space-y-3">
         <Label className="text-sidebar-foreground font-medium">Mode</Label>
-        <div className="flex items-center gap-1 p-1 bg-sidebar-accent rounded-lg">
-          <Button
-            variant={mode === "complete" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setMode("complete")}
-            className={`flex-1 text-xs sm:text-sm ${
-              mode === "complete"
-                ? "bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
-                : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            }`}
-          >
-            <GridIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Complete</span>
-          </Button>
-          <Button
-            variant={mode === "insert" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setMode("insert")}
-            className={`flex-1 text-xs sm:text-sm ${
-              mode === "insert"
-                ? "bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
-                : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            }`}
-          >
-            <DownloadIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Insert</span>
-          </Button>
-          <Button
-            variant={mode === "edit" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setMode("edit")}
-            className={`flex-1 text-xs sm:text-sm ${
-              mode === "edit"
-                ? "bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90"
-                : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            }`}
-          >
-            <ListIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Edit</span>
-          </Button>
+        <div className="grid grid-cols-3 gap-2 p-1 bg-sidebar-accent rounded-lg">
+          {[
+            { key: "complete", label: "Complete", icon: BotIcon },
+            { key: "chat", label: "Chat", icon: MessageSquareIcon },
+            { key: "edit", label: "Edit", icon: PenToolIcon }
+          ].map((modeOption) => (
+            <Button
+              key={modeOption.key}
+              variant={mode === modeOption.key ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setMode(modeOption.key as any)}
+              className={`flex items-center gap-2 ${
+                mode === modeOption.key
+                  ? "bg-sidebar-foreground text-sidebar"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+              }`}
+            >
+              <modeOption.icon className="h-4 w-4" />
+              <span className="hidden sm:inline">{modeOption.label}</span>
+            </Button>
+          ))}
         </div>
+        <p className="text-xs text-sidebar-foreground/60">{getModeDescription()}</p>
       </div>
 
-      {/* Model Selection */}
+      {/* Project Selection */}
       <div className="space-y-3">
-        <Label htmlFor="model" className="text-sidebar-foreground font-medium">
-          Model
+        <Label htmlFor="project" className="text-sidebar-foreground font-medium">
+          Project
         </Label>
-        <Select value={model} onValueChange={setModel}>
+        <Select value={selectedProject} onValueChange={setSelectedProject}>
           <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
-            <SelectValue />
+            <SelectValue placeholder="Select a project..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="text-davinci-003">text-davinci-003</SelectItem>
-            <SelectItem value="text-curie-001">text-curie-001</SelectItem>
-            <SelectItem value="text-babbage-001">text-babbage-001</SelectItem>
-            <SelectItem value="text-ada-001">text-ada-001</SelectItem>
-            <SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
-            <SelectItem value="gpt-4">gpt-4</SelectItem>
+            {userProjects.map((project) => (
+              <SelectItem key={project.id} value={project.id.toString()}>
+                <div className="flex flex-col">
+                  <span>{project.name}</span>
+                  <span className="text-xs text-muted-foreground">{project.description}</span>
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Temperature */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-sidebar-foreground font-medium">Temperature</Label>
-          <span className="text-sm text-sidebar-foreground/70">{temperature[0]}</span>
+      {/* Personality Configuration */}
+      <div className="space-y-4">
+        <h3 className="text-sidebar-foreground font-medium">Personality</h3>
+        
+        <div className="space-y-3">
+          <Label htmlFor="personality" className="text-sidebar-foreground text-sm">
+            You are a:
+          </Label>
+          <Input
+            id="personality"
+            value={personality}
+            onChange={(e) => setPersonality(e.target.value)}
+            placeholder="helpful and friendly assistant"
+            className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50"
+          />
         </div>
-        <Slider
-          value={temperature}
-          onValueChange={setTemperature}
-          max={2}
-          min={0}
-          step={0.01}
-          className="w-full"
-        />
+
+        <div className="space-y-3">
+          <Label htmlFor="tone" className="text-sidebar-foreground text-sm">
+            Tone
+          </Label>
+          <Select value={tone} onValueChange={setTone}>
+            <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="professional">Professional</SelectItem>
+              <SelectItem value="casual">Casual</SelectItem>
+              <SelectItem value="friendly">Friendly</SelectItem>
+              <SelectItem value="formal">Formal</SelectItem>
+              <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+              <SelectItem value="empathetic">Empathetic</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-3">
+          <Label htmlFor="expertise" className="text-sidebar-foreground text-sm">
+            Area of Expertise
+          </Label>
+          <Input
+            id="expertise"
+            value={expertise}
+            onChange={(e) => setExpertise(e.target.value)}
+            placeholder="e.g., customer service, technical support, sales"
+            className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50"
+          />
+        </div>
+
+        <div className="space-y-3">
+          <Label htmlFor="responseStyle" className="text-sidebar-foreground text-sm">
+            Response Style
+          </Label>
+          <Select value={responseStyle} onValueChange={setResponseStyle}>
+            <SelectTrigger className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="concise">Concise</SelectItem>
+              <SelectItem value="detailed">Detailed</SelectItem>
+              <SelectItem value="step-by-step">Step-by-step</SelectItem>
+              <SelectItem value="conversational">Conversational</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Maximum Length */}
-      <div className="space-y-3">
+      {/* Behavior Settings */}
+      <div className="space-y-4">
+        <h3 className="text-sidebar-foreground font-medium">Behavior</h3>
+        
         <div className="flex items-center justify-between">
-          <Label className="text-sidebar-foreground font-medium">Maximum Length</Label>
-          <span className="text-sm text-sidebar-foreground/70">{maxLength[0]}</span>
+          <div className="space-y-1">
+            <Label className="text-sidebar-foreground text-sm">Use Emojis</Label>
+            <p className="text-xs text-sidebar-foreground/60">Include emojis in responses</p>
+          </div>
+          <Switch
+            checked={useEmojis}
+            onCheckedChange={setUseEmojis}
+          />
         </div>
-        <Slider
-          value={maxLength}
-          onValueChange={setMaxLength}
-          max={4000}
-          min={1}
-          step={1}
-          className="w-full"
-        />
-      </div>
 
-      {/* Top P */}
-      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sidebar-foreground font-medium">Top P</Label>
-          <span className="text-sm text-sidebar-foreground/70">{topP[0]}</span>
+          <div className="space-y-1">
+            <Label className="text-sidebar-foreground text-sm">Include Examples</Label>
+            <p className="text-xs text-sidebar-foreground/60">Provide examples when helpful</p>
+          </div>
+          <Switch
+            checked={includeExamples}
+            onCheckedChange={setIncludeExamples}
+          />
         </div>
-        <Slider
-          value={topP}
-          onValueChange={setTopP}
-          max={1}
-          min={0}
-          step={0.01}
-          className="w-full"
-        />
+
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Label className="text-sidebar-foreground text-sm">Factual Mode</Label>
+            <p className="text-xs text-sidebar-foreground/60">Focus on facts and accuracy</p>
+          </div>
+          <Switch
+            checked={factualMode}
+            onCheckedChange={setFactualMode}
+          />
+        </div>
       </div>
 
       {/* Additional Controls */}
       <div className="pt-4 border-t border-sidebar-border">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
-            className="w-full sm:w-auto text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           >
             <SettingsIcon className="h-4 w-4 mr-2" />
             Advanced
@@ -183,7 +275,7 @@ export function Playground() {
           <Button
             variant="ghost"
             size="sm"
-            className="w-full sm:w-auto text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           >
             <DownloadIcon className="h-4 w-4 mr-2" />
             Export
@@ -196,86 +288,113 @@ export function Playground() {
   return (
     <div className="flex h-full w-full max-w-full overflow-hidden bg-background">
       {/* Left Panel - Input Area */}
-      <div className="flex-1 flex flex-col min-h-0 border-r border-sidebar-border">
-        <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 p-4 lg:p-6 space-y-4 lg:space-y-6 overflow-y-auto">
+          {/* Mode indicator for mobile */}
+          <div className="lg:hidden">
+            <div className="flex items-center gap-2 mb-4">
+              {getModeIcon(mode)}
+              <span className="text-sm font-medium text-sidebar-foreground capitalize">{mode}</span>
+              <Sheet open={showMobileConfig} onOpenChange={setShowMobileConfig}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
+                  >
+                    <SettingsIcon className="h-4 w-4 mr-2" />
+                    Configure
+                  </Button>
+                </SheetTrigger>
+                <SheetContent 
+                  side="right" 
+                  className="w-full sm:max-w-md bg-sidebar border-sidebar-border overflow-y-auto"
+                >
+                  <SheetHeader>
+                    <SheetTitle className="text-sidebar-foreground">Configuration</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <ConfigurationContent />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+
           {/* Main Input Area */}
           <div className="space-y-4">
-            <Textarea
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Enter your text here..."
-              className="min-h-[200px] sm:min-h-[300px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-sidebar-ring focus:border-transparent"
-            />
+            <div>
+              <Label htmlFor="input" className="text-sidebar-foreground font-medium mb-2 block">
+                {mode === "chat" ? "Message" : mode === "edit" ? "Text to Edit" : "Input"}
+              </Label>
+              <Textarea
+                id="input"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder={
+                  mode === "chat" 
+                    ? "Type your message here..." 
+                    : mode === "edit" 
+                    ? "Enter text to edit..." 
+                    : "Enter your text here..."
+                }
+                className="min-h-[200px] lg:min-h-[300px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-sidebar-ring focus:border-transparent"
+              />
+            </div>
           </div>
 
           {/* Instructions Section */}
           <div className="space-y-3">
             <Label htmlFor="instructions" className="text-sidebar-foreground font-medium">
-              Instructions
+              {mode === "chat" ? "System Instructions" : "Instructions"}
             </Label>
             <Textarea
               id="instructions"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Enter instructions for the AI..."
-              className="min-h-[80px] sm:min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-sidebar-ring focus:border-transparent"
+              placeholder={
+                mode === "chat"
+                  ? "Set the context and behavior for the conversation..."
+                  : mode === "edit"
+                  ? "Describe how you want the text to be edited..."
+                  : "Enter instructions for the AI..."
+              }
+              className="min-h-[100px] lg:min-h-[120px] resize-none bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus:ring-2 focus:ring-sidebar-ring focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="border-t border-sidebar-border p-3 sm:p-4 bg-sidebar-accent/50">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={handleSubmit}
-                className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90 font-medium"
-              >
-                Submit
-              </Button>
-              <Button
-                onClick={handleReset}
-                variant="ghost"
-                size="icon"
-                className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <RotateCcwIcon className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Mobile Configuration Toggle */}
-            {isMobile && (
-              <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/80"
-                  >
-                    <SettingsIcon className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent 
-                  side="right" 
-                  className="w-full sm:max-w-md bg-sidebar border-sidebar-border"
-                >
-                  <SheetHeader>
-                    <SheetTitle className="text-sidebar-foreground">Configuration</SheetTitle>
-                  </SheetHeader>
-                  <ConfigurationPanel />
-                </SheetContent>
-              </Sheet>
-            )}
+        <div className="border-t border-sidebar-border p-4 bg-sidebar-accent/50">
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleSubmit}
+              className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90 font-medium"
+            >
+              <SendIcon className="h-4 w-4 mr-2" />
+              {mode === "chat" ? "Send" : "Submit"}
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="ghost"
+              size="icon"
+              className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            >
+              <RotateCcwIcon className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Right Panel - Configuration (Desktop Only) */}
-      {!isMobile && (
-        <div className="w-80 flex flex-col bg-sidebar-accent/30 min-h-0">
-          <ConfigurationPanel />
+      {/* Right Panel - Configuration (Desktop only) */}
+      <div className="hidden lg:flex w-80 xl:w-96 flex-col bg-sidebar-accent/30 min-h-0 border-l border-sidebar-border">
+        <div className="p-6 space-y-6 overflow-y-auto">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-sidebar-foreground">Configuration</h2>
+          </div>
+          <ConfigurationContent />
         </div>
-      )}
+      </div>
     </div>
   )
 }
