@@ -3,7 +3,6 @@
 import * as React from "react"
 import { 
   SendIcon, 
-  RotateCcwIcon,
   BotIcon,
   UserIcon,
   SettingsIcon,
@@ -47,6 +46,7 @@ const mockProjects = [
 
 export function Playground() {
   const isMobile = useIsMobile()
+  const [isTablet, setIsTablet] = React.useState(false)
   const [selectedProject, setSelectedProject] = React.useState("4")
   const [description, setDescription] = React.useState("You are a helpful customer support assistant for an e-commerce company. You help customers with orders, returns, and product questions. Be friendly, professional, and concise in your responses.")
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false)
@@ -61,6 +61,18 @@ export function Playground() {
   ])
   const [currentMessage, setCurrentMessage] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
+
+  // Check for tablet view (768px to 1024px)
+  React.useEffect(() => {
+    const checkTablet = () => {
+      const width = window.innerWidth
+      setIsTablet(width >= 768 && width < 1024)
+    }
+    
+    checkTablet()
+    window.addEventListener('resize', checkTablet)
+    return () => window.removeEventListener('resize', checkTablet)
+  }, [])
 
   const selectedProjectName = mockProjects.find(p => p.id === selectedProject)?.name || 'My Chatbot'
 
@@ -89,18 +101,6 @@ export function Playground() {
       setMessages(prev => [...prev, assistantMessage])
       setIsLoading(false)
     }, 1500)
-  }
-
-  const handleReset = () => {
-    setMessages([
-      {
-        id: '1',
-        role: 'assistant',
-        content: 'Hello! I\'m your customer support assistant. How can I help you today?',
-        timestamp: new Date()
-      }
-    ])
-    setCurrentMessage("")
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -186,6 +186,9 @@ export function Playground() {
     </div>
   )
 
+  // Determine if we should show settings panel (desktop only, not tablet or mobile)
+  const showSettingsPanel = !isMobile && !isTablet
+
   return (
     <div className="flex h-full w-full max-w-full overflow-hidden bg-background">
       {/* Left Panel - Chat Interface */}
@@ -194,25 +197,15 @@ export function Playground() {
         <div className="border-b border-sidebar-border p-4 bg-background">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                <BotIcon className="h-6 w-6 text-white" />
+              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <BotIcon className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h3 className="text-sidebar-foreground font-semibold">{selectedProjectName}</h3>
-                <p className="text-sidebar-foreground/60 text-sm">Testing Mode</p>
+                <h3 className="text-sidebar-foreground font-medium text-sm">{selectedProjectName}</h3>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                onClick={handleReset}
-                variant="ghost"
-                size="sm"
-                className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <RotateCcwIcon className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Reset</span>
-              </Button>
-              {isMobile ? (
+              {(isMobile || isTablet) ? (
                 <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                   <SheetTrigger asChild>
                     <Button
@@ -314,8 +307,8 @@ export function Playground() {
         </div>
       </div>
 
-      {/* Right Panel - Desktop Only */}
-      {!isMobile && (
+      {/* Right Panel - Desktop Only (not tablet) */}
+      {showSettingsPanel && (
         <div className="w-80 flex flex-col min-h-0">
           <SettingsPanel />
         </div>
